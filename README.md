@@ -27,9 +27,19 @@ the DAO dashboard at dao.nonfungiblegang.com.
 1.4 [Proposals](#14-proposals) |
 1.5 [Staking](#15-staking) 
 ### 2. [Tables](#2-tables)
-### 3. [Scopes](#3-scopes)
-### 4. [Ricardian Contracts](#4-ricardian-contracts)
-### 5. [Multi Index Table Definitions](#5-multi-index-table-definitions)
+2.1 [custodians](#21-custodians) |
+2.2 [candidates](#22-candidates) |
+2.3 [membership](#23-membership) |
+2.4 [memconfigs](#24-memconfigs) |
+2.5 [totalweights](#25-totalweights) |
+2.6 [proposals](#26-proposals) |
+2.7 [propvotes](#27-propvotes) |
+2.8 [elections](#28-elections) |
+2.9 [daos_p](#29-daos_p) |
+2.10 [daotokens](#210-daotokens) |
+2.11 [receipts](#211-receipts) 
+
+
 
 ## 1. Actions
 
@@ -234,6 +244,123 @@ The `unstake` action unstakes an asset from the DAO.
 
 
 ## 2. Tables
+
+### 2.1 Custodians
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `cust_name` | name | The name of the custodian | Primary Key |
+| `dao_name` | name | The name of the DAO | Secondary Key |
+| `total_votes` | uint64_t | The total votes of the custodian | |
+| `cust_end` | uint64_t | The end time of the custodian | |
+
+### 2.2 Candidates
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `cand_id` | uint64_t | The id of the candidate | Primary Key |
+| `cand_name` | name | The name of the candidate | Secondary Key |
+| `dao_name` | name | The name of the DAO | Secondary Key |
+| `votes` | uint64_t | The votes of the candidate | Secondary Key |
+| `election_id` | uint64_t | The id of the election | Secondary Key |
+
+### 2.3 Membership
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `asset_id` | uint64_t | The asset id of the staked asset | Primary Key |
+| `user` | name | The account that stakes the asset | Secondary Key |
+| `dao_name` | name | The name of the DAO | Secondary Key |
+| `shares` | uint32_t | The share power of the staked asset | |
+| `votes` | uint32_t | The voting power of the staked asset | |
+| `reg_time` | uint64_t | The registration time of the staked asset | |
+| `l_p_claim` | uint64_t | The last time the staked asset claimed payment | |
+| `l_e_vote` | uint64_t | The last time the staked asset voted for an election | |
+
+### 2.4 Memconfigs
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `template_id` | uint32_t | The id of the template | Primary Key |
+| `dao_name` | name | The name of the DAO | Secondary Key |
+| `vote_weight` | uint32_t | The voting weight of the template | |
+| `share_weight` | uint32_t | The share weight of the template | |
+
+### 2.5 Totalweights
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `dao_name` | name | The name of the DAO | Primary Key |
+| `vote_totals` | uint32_t | The total voting power of the DAO | |
+| `share_totals` | uint32_t | The total share power of the DAO | |
+
+### 2.6 Proposals
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `proposal_id` | uint64_t | The id of the proposal | Primary Key |
+| `dao_name` | name | The name of the DAO | Secondary Key |
+| `custodian` | name | The name of the custodian | Secondary Key |
+| `proposal` | string | The proposal | |
+| `votes_for` | uint64_t | The votes for the proposal | |
+| `votes_against` | uint64_t | The votes against the proposal | |
+| `approved` | uint8_t | The approval status of the proposal | |
+| `expiry` | uint64_t | The expiry time of the proposal | |
+
+### 2.7 Propvotes
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `id` | uint64_t | The id of the proposal vote | Primary Key |
+| `proposal_id` | uint64_t | The id of the proposal | Secondary Key |
+| `user` | name | The account that votes for the proposal | Secondary Key |
+| `vote` | uint8_t | The vote of the account | |
+
+### 2.8 Elections
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `election_id` | uint64_t | The id of the election | Primary Key |
+| `dao_name` | name | The name of the DAO | Secondary Key |
+| `start` | uint64_t | The start time of the election | |
+| `end` | uint64_t | The end time of the election | |
+| `elected_n` | uint8_t | The number of elected custodians | |
+| `votes_issued` | uint64_t | The total votes already issued at the election | |
+| `total_votes` | uint64_t | The total possible votes of the election | |
+
+
+### 2.9 Daos_p
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `payment_id` | uint64_t | The id of the payment | Primary Key |
+| `dao_name` | name | The name of the DAO | Secondary Key |
+| `total_shares` | uint64_t | The total shares of the DAO at the moment the payment was issued | |
+| `quantity` | asset | The quantity of the payment | |
+
+### 2.10 Daotokens
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `dao_name` | name | The name of the DAO | Primary Key |
+| `token_contract` | name | The contract of the token | |
+| `token_symbol` | symbol_code | The symbol of the token | |
+| `dao_payer` | name | The account that handles DAO's payments | |
+
+### 2.11 Receipts
+
+| Parameter | Type | Description | Index |
+| --- | --- | --- | --- |
+| `receipt_id` | uint64_t | The id of the receipt | Primary Key |
+| `payment_id` | uint64_t | The id of the payment | Secondary Key |
+| `dao_name` | name | The name of the DAO | Secondary Key |
+| `user` | name | The account that receives the payment | Secondary Key |
+| `quantity` | asset | The quantity of the payment | |
+
+
+
+
+
 
 
 
