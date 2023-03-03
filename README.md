@@ -18,6 +18,17 @@ The DAO main account is the account that created the DAO and we intend to create
 New members can join the DAO by buying the DAO NFT asset from the AtomicMarketplace and staking the NFT asset to the DAO main account by accessing
 the DAO dashboard at dao.nonfungiblegang.com.
 
+## How to compile
+
+Install eosio.cdt v1.7.0 or higher by following the instructions at 
+[EOSIO Developers - Install prebuilt binaries](https://developers.eos.io/manuals/eos/latest/install/install-prebuilt-binaries). I'm currently using v1.8.1.
+
+### Compile command
+
+```bash
+    eosio-cpp -abigen -o gangdao.wasm gangdao.cpp
+```
+
 
 ## Table of Contents
 ### 1. [Actions](#1-actions)

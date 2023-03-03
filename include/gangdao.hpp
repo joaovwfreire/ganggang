@@ -18,23 +18,23 @@ using namespace std;
 				contract(receiver, code, ds) {}
 
 // onboarding logic
-ACTION registerdao(name dao_name, name token_contract, name dao_payer);
-ACTION setweights(name dao_name, uint32_t template_id, uint16_t vote_weight, uint16_t share_weight );
+ACTION registerdao(name dao_name, name token_contract, symbol_code ticker, name dao_payer);
+ACTION setweights(uint32_t template_id, name dao_name, uint16_t vote_weight, uint16_t share_weight );
 
 //voting governance logic
 ACTION votecand(name user, uint64_t election_id, vector<eosio::name> candidates, uint64_t staked_asset);
 
 //registering governance logic
-ACTION addcandidate(name cand, name dao_name, uint64_t asset_id);
+ACTION addcandidate(name cand, uint64_t election_id, name dao_name, uint64_t asset_id);
 ACTION startelect(name dao_name, uint64_t end, uint8_t elected_n);
-ACTION finishelect(name dao_name);
+ACTION finishelect(name dao_name, uint64_t election_id);
 
 // proposal governance logic
 ACTION propose(name cust, name dao_name, uint64_t asset_id, std::string proposal);
 ACTION voteprop(name user, uint64_t proposal_id, uint64_t asset_id, std::string vote);
 
 //payment handling logic
-ACTION claimp(name user, name dao_name, uint64_t staked_asset);
+ACTION claimp(name user, name dao_name, uint64_t payment_id, uint64_t staked_asset);
 ACTION addpayment(const name& dao_name, eosio::asset quantity);
 
 
@@ -85,7 +85,7 @@ struct [[eosio::table("custodians"), eosio::contract("gangdao")]] custodian {
             eosio::indexed_by<"bycand"_n, eosio::const_mem_fun<candidate, uint64_t, &candidate::primary_key> >,
             eosio::indexed_by<"bycandidate"_n, eosio::const_mem_fun<candidate, uint64_t, &candidate::by_cand_name> >,
             eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<candidate, uint64_t, &candidate::by_number_votes> >,
-            eosio::indexed_by<"bycandelection"_n, eosio::const_mem_fun<candidate, uint128_t, &candidate::by_cand_and_election> >
+            eosio::indexed_by<"bycandelect"_n, eosio::const_mem_fun<candidate, uint128_t, &candidate::by_cand_and_election> >
     > candidates_table;
 
 
@@ -120,9 +120,10 @@ struct [[eosio::table("custodians"), eosio::contract("gangdao")]] custodian {
 
         uint64_t primary_key()const { return template_id; }
         uint64_t by_dao_name() const { return dao_name.value; }
+         
         
     };
-    typedef eosio::multi_index< "memconfigs"_n, memconfigs 
+    typedef eosio::multi_index< "memconfigs"_n, memconfigs, 
             eosio::indexed_by<"bytemplate"_n, eosio::const_mem_fun<memconfigs, uint64_t, &memconfigs::primary_key> >,
             eosio::indexed_by<"bydao"_n, eosio::const_mem_fun<memconfigs, uint64_t, &memconfigs::by_dao_name> >
     > membership_config_table;
@@ -154,7 +155,7 @@ struct [[eosio::table("custodians"), eosio::contract("gangdao")]] custodian {
         uint64_t by_custodian() const { return custodian.value; }
 
     };
-    typedef eosio::multi_index< "proposals"_n, proposals 
+    typedef eosio::multi_index< "proposals"_n, proposals,
             eosio::indexed_by<"byproposal"_n, eosio::const_mem_fun<proposals, uint64_t, &proposals::primary_key> >,
             eosio::indexed_by<"bydao"_n, eosio::const_mem_fun<proposals, uint64_t, &proposals::by_dao_name> >,
             eosio::indexed_by<"bycustodian"_n, eosio::const_mem_fun<proposals, uint64_t, &proposals::by_custodian> >
@@ -172,11 +173,11 @@ struct [[eosio::table("custodians"), eosio::contract("gangdao")]] custodian {
         uint128_t by_proposal_and_user() const { return (static_cast<uint128_t>(proposal_id) << 64) | user.value; }
 
     };
-    typedef eosio::multi_index< "propvotes"_n, propvotes 
+    typedef eosio::multi_index< "propvotes"_n, propvotes,
             eosio::indexed_by<"byid"_n, eosio::const_mem_fun<propvotes, uint64_t, &propvotes::primary_key> >,
             eosio::indexed_by<"byproposal"_n, eosio::const_mem_fun<propvotes, uint64_t, &propvotes::by_proposal_id> >,
             eosio::indexed_by<"byuser"_n, eosio::const_mem_fun<propvotes, uint64_t, &propvotes::by_user> >,
-            eosio::indexed_by<"byproposaluser"_n, eosio::const_mem_fun<propvotes, uint128_t, &propvotes::by_proposal_and_user> >
+            eosio::indexed_by<"bypropuser"_n, eosio::const_mem_fun<propvotes, uint128_t, &propvotes::by_proposal_and_user> >
     > proposalvotes;
 
 
@@ -193,7 +194,7 @@ struct [[eosio::table("custodians"), eosio::contract("gangdao")]] custodian {
         uint64_t by_dao_name() const { return dao_name.value; }
 
     };
-    typedef eosio::multi_index< "elections"_n, elections
+    typedef eosio::multi_index< "elections"_n, elections,
             eosio::indexed_by<"byelection"_n, eosio::const_mem_fun<elections, uint64_t, &elections::primary_key> >,
             eosio::indexed_by<"bydao"_n, eosio::const_mem_fun<elections, uint64_t, &elections::by_dao_name> >
     > elections_table;
@@ -208,9 +209,9 @@ struct [[eosio::table("custodians"), eosio::contract("gangdao")]] custodian {
         uint64_t primary_key()const { return payment_id; }
         uint64_t by_dao_name() const { return dao_name.value; }
     };
-    typedef eosio::multi_index< "daos"_n, daos,
-            eosio::indexed_by<"byid"_n, eosio::const_mem_fun<daos, uint64_t, &daos::primary_key> >,
-            eosio::indexed_by<"bydaoname"_n, eosio::const_mem_fun<daos, uint64_t, &daos::by_dao_name> >
+    typedef eosio::multi_index< "daos"_n, daos_p,
+            eosio::indexed_by<"byid"_n, eosio::const_mem_fun<daos_p, uint64_t, &daos_p::primary_key> >,
+            eosio::indexed_by<"bydaoname"_n, eosio::const_mem_fun<daos_p, uint64_t, &daos_p::by_dao_name> >
     > daos_index;
 
     struct [[eosio::table]] daotokens{
@@ -219,8 +220,8 @@ struct [[eosio::table("custodians"), eosio::contract("gangdao")]] custodian {
         eosio::symbol_code token_symbol;
         eosio::name dao_payer;
 
-        uint64_t primary_key() const { return dao_name.value}
-    }
+        uint64_t primary_key() const { return dao_name.value; }
+    };
 
     typedef eosio::multi_index<"daotokens"_n, daotokens> daotokens_index;
 
@@ -240,22 +241,22 @@ struct [[eosio::table("custodians"), eosio::contract("gangdao")]] custodian {
     };
     typedef eosio::multi_index< "receipts"_n, receipts,
             eosio::indexed_by<"byid"_n, eosio::const_mem_fun<receipts, uint64_t, &receipts::primary_key> >,
-            eosio::indexed_by<"bydaoname"_n, eosio::const_mem_fun<receipts, uint64_t, &receipts::by_dao_name>,
+            eosio::indexed_by<"bydaoname"_n, eosio::const_mem_fun<receipts, uint64_t, &receipts::by_dao_name> >,
             eosio::indexed_by<"byuser"_n, eosio::const_mem_fun<receipts, uint64_t, &receipts::by_user> >,
             eosio::indexed_by<"byuserandid"_n, eosio::const_mem_fun<receipts, uint128_t, &receipts::by_user_and_id> >
     > receipts_index;
 
 
     HYDRA_FIXTURE_ACTION(
-        ((custodians)(custodians)(custodians_table))
-        ((candidates)(candidates)(candidates_table))
-        ((membership)(membership)(membership_index))
-        ((memconfigs)(memconfigs)(memconfigs_index))
+        ((custodians)(custodian)(custodians_table))
+        ((candidates)(candidate)(candidates_table))
+        ((membership)(membership)(membership_table))
+        ((memconfigs)(memconfigs)(membership_config_table))
         ((totalweights)(totalweights)(totalweights_index))
         ((proposals)(proposals)(proposals_table))
         ((propvotes)(propvotes)(proposalvotes))
         ((elections)(elections)(elections_table))
-        ((daos)(daos)(daos_index))
+        ((daos)(daos_p)(daos_index))
         ((receipts)(receipts)(receipts_index))
         ((daotokens)(daotokens)(daotokens_index))
     )

@@ -18,12 +18,12 @@ ACTION voteprop(name user, uint64_t proposal_id, uint64_t asset_id, std::string 
 void gangdao::propose(name cust, name dao_name, uint64_t asset_id, std::string proposal){
     require_auth(cust);
     //check if dao exists
-    dao_index dao_table(_self, _self.value);
+    daos_index dao_table(_self, _self.value);
     auto dao_itr = dao_table.find(dao_name.value);
     check (dao_itr != dao_table.end(), "dao does not exist");
     //check if cust is really a custodian
 
-    custodians_index cust_table(_self, dao_name.value);
+    custodians_table cust_table(_self, dao_name.value);
     auto cust_itr = cust_table.find(cust.value);
     check (cust_itr != cust_table.end(), "custodian does not exist");
     check (cust_itr-> dao_name == dao_name, "custodian does not belong to this dao");
@@ -32,28 +32,18 @@ void gangdao::propose(name cust, name dao_name, uint64_t asset_id, std::string p
     membership_table mem_table(_self, dao_name.value);
     auto mem_itr = mem_table.find(asset_id);
     check (mem_itr != mem_table.end(), "asset not found");
-    
-    uint64_t proposal_id;
-        eosio::name dao_name;
-        eosio::name custodian;
-        std::string proposal;
-        uint64_t votes_for;
-        uint64_t votes_against;
-        uint8_t approved;
-        uint64_t expiry;
 
     //get current time
     eosio::time_point_sec tps = eosio::current_time_point();
     uint64_t COUNT_SECONDS (tps.sec_since_epoch());
 
     //create proposal
-    proposals_index proposals_table(_self, _self.value);
-    proposals_table.emplace(_self, [&](auto& row){
-        row.proposal_id = proposals_table.available_primary_key();
+    proposals_table proposals_t(_self, _self.value);
+    proposals_t.emplace(_self, [&](auto& row){
+        row.proposal_id = proposals_t.available_primary_key();
         row.proposal = proposal;
         row.custodian = cust;
         row.dao_name = dao_name;
-        row.status = "open";
         row.expiry = COUNT_SECONDS + 604800; // 7 days
         row.votes_for = 0;
         row.votes_against = 0;
@@ -81,7 +71,7 @@ void gangdao::propose(name cust, name dao_name, uint64_t asset_id, std::string p
 void gangdao::voteprop(name user, uint64_t proposal_id, uint64_t asset_id, std::string vote){
     require_auth(user);
     //check if proposal exists
-    proposals_index proposals_table(_self, _self.value);
+    proposals_table proposals_table(_self, _self.value);
     auto proposals_itr = proposals_table.find(proposal_id);
     check (proposals_itr != proposals_table.end(), "proposal does not exist");
 
@@ -98,7 +88,7 @@ void gangdao::voteprop(name user, uint64_t proposal_id, uint64_t asset_id, std::
     // check if user has already voted by querying byproposaluser secondary index
     uint128_t proposal_id_user = (uint128_t(proposal_id) << 64) | user.value;
     proposalvotes proptable(_self, _self.value);
-    auto by_proposal_user = proptable.get_index<"byproposaluser"_n>();
+    auto by_proposal_user = proptable.get_index<"bypropuser"_n>();
     auto prop_itr = by_proposal_user.find(proposal_id);
     check (prop_itr == by_proposal_user.end(), "user has already voted on this proposal");
 
@@ -107,21 +97,31 @@ void gangdao::voteprop(name user, uint64_t proposal_id, uint64_t asset_id, std::
     uint64_t COUNT_SECONDS (tps.sec_since_epoch());
     check (COUNT_SECONDS < proposals_itr->expiry, "proposal vote is closed");
 
+    uint8_t vote_int = 0;
+    if (vote == "yes"){
+        vote_int = 1;
+    }
+    else if (vote == "no"){
+        vote_int = 2;
+    }
+    else if (vote == "abstain"){
+        vote_int = 3;
+    }
     //create proposal vote
     proptable.emplace(_self, [&](auto& row){
         row.id = proptable.available_primary_key();
         row.proposal_id = proposal_id;
         row.user = user;
-        row.vote = vote;
+        row.vote = vote_int;
     });
 
     //update proposal vote count
     proposals_table.modify(proposals_itr, _self, [&](auto& row){
         if (vote == "yes"){
-            row.votes_for += mem_itr->vote_weight;
+            row.votes_for += mem_itr->votes;
         }
         else if (vote == "no"){
-            row.votes_against += mem_itr->vote_weight;
+            row.votes_against += mem_itr->votes;
         } 
     });
 

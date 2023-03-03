@@ -1,5 +1,6 @@
 // import gangdao.hpp
-#include "../include/gangdao.hpp"
+#include "./include/gangdao.hpp"
+
 // import proposals, payment, governance, staking cpp files
 #include "proposals.cpp"
 #include "payment.cpp"
@@ -41,7 +42,7 @@ void gangdao::registerdao(name dao_name, name token_contract, symbol_code ticker
     daotokens_table.emplace(_self, [&](auto& row){
         row.dao_name = dao_name;
         row.token_contract = token_contract;
-        row.ticker = ticker;
+        row.token_symbol = ticker;
         row.dao_payer = dao_payer;
     });
 }

@@ -26,16 +26,19 @@ ACTION addpayment(const name& dao_name, eosio::asset quantity);
 void gangdao::claimp(name user, name dao_name, uint64_t payment_id, uint64_t staked_asset){
     // transfer payment from dao_payer to user
     name dao_payer;
-    daos_index daos_table(_self, _self.value);
+    name token_contract;
+    daotokens_index daos_table(_self, _self.value);
     auto daos_itr = daos_table.find(dao_name.value);
     if (daos_itr != daos_table.end()){
         dao_payer = daos_itr->dao_payer;
+        token_contract = daos_itr->token_contract;
     } else {
         check(false, "dao does not exist");
     }
+
     require_auth(user);
 
-    payments_index payments_table(_self, dao_name.value);
+    daos_index payments_table(_self, dao_name.value);
     auto payments_itr = payments_table.find(payment_id);
 
     // check if payment exists
@@ -54,7 +57,7 @@ void gangdao::claimp(name user, name dao_name, uint64_t payment_id, uint64_t sta
     auto members_itr = members_table.find(staked_asset);
     check (members_itr != members_table.end(), "asset is not a part of the dao");
     check (members_itr->user == user, "user does not own the asset");
-    uint16_t share_weight = members_itr->share_weight;
+    uint16_t share_weight = members_itr->shares;
 
     // get payment quantity
     eosio::asset payment_quantity = payments_itr->quantity;
@@ -63,15 +66,6 @@ void gangdao::claimp(name user, name dao_name, uint64_t payment_id, uint64_t sta
     uint64_t total_shares = payments_itr->total_shares;
     // calculate payment amount
     eosio::asset payment_amount = payment_quantity * share_weight / total_shares;
-
-    // get token contract
-    name token_contract;
-    auto daos_itr = daos_table.find(dao_name.value);
-    if (daos_itr != daos_table.end()){
-        token_contract = daos_itr->token_contract;
-    } else {
-        check(false, "dao does not exist");
-    }
 
     // transfer payment
     action(
@@ -83,7 +77,7 @@ void gangdao::claimp(name user, name dao_name, uint64_t payment_id, uint64_t sta
 
     // add receipt to receipts table
     receipts_table.emplace(_self, [&](auto& row){
-        row.id = receipts_table.available_primary_key();
+        row.receipt_id = receipts_table.available_primary_key();
         row.dao_name = dao_name;
         row.user = user;
         row.payment_id = payment_id;
@@ -111,7 +105,7 @@ void gangdao::claimp(name user, name dao_name, uint64_t payment_id, uint64_t sta
 void gangdao::addpayment(const name& dao_name, eosio::asset quantity){
     // find dao_payer
     name dao_payer;
-    daos_index daos_table(_self, _self.value);
+    daotokens_index daos_table(_self, _self.value);
     auto daos_itr = daos_table.find(dao_name.value);
     if (daos_itr != daos_table.end()){
         dao_payer = daos_itr->dao_payer;
@@ -119,9 +113,9 @@ void gangdao::addpayment(const name& dao_name, eosio::asset quantity){
         check(false, "dao does not exist");
     }
     require_auth(dao_payer);
-    payments_index payments_table(_self, dao_name.value);
+    daos_index payments_table(_self, dao_name.value);
     payments_table.emplace(_self, [&](auto& row){
-        row.id = payments_table.available_primary_key();
+        row.payment_id = payments_table.available_primary_key();
         row.quantity = quantity;
     });
 }

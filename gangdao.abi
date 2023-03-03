@@ -1,0 +1,684 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "addcandidate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "cand",
+                    "type": "name"
+                },
+                {
+                    "name": "election_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "addpayment",
+            "base": "",
+            "fields": [
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "candidate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "cand_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "cand_name",
+                    "type": "name"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "votes",
+                    "type": "uint64"
+                },
+                {
+                    "name": "election_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "claimp",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "payment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "staked_asset",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "custodian",
+            "base": "",
+            "fields": [
+                {
+                    "name": "cust_name",
+                    "type": "name"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "total_votes",
+                    "type": "uint64"
+                },
+                {
+                    "name": "cust_end",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "daos_p",
+            "base": "",
+            "fields": [
+                {
+                    "name": "payment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "total_shares",
+                    "type": "uint64"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "daotokens",
+            "base": "",
+            "fields": [
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "token_symbol",
+                    "type": "symbol_code"
+                },
+                {
+                    "name": "dao_payer",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "elections",
+            "base": "",
+            "fields": [
+                {
+                    "name": "election_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "start",
+                    "type": "uint64"
+                },
+                {
+                    "name": "end",
+                    "type": "uint64"
+                },
+                {
+                    "name": "elected_n",
+                    "type": "uint8"
+                },
+                {
+                    "name": "votes_issued",
+                    "type": "uint64"
+                },
+                {
+                    "name": "total_votes",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "finishelect",
+            "base": "",
+            "fields": [
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "election_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "hydraload",
+            "base": "",
+            "fields": [
+                {
+                    "name": "payload",
+                    "type": "hydraload_payload[]"
+                }
+            ]
+        },
+        {
+            "name": "hydraload_payload",
+            "base": "",
+            "fields": [
+                {
+                    "name": "table_name",
+                    "type": "name"
+                },
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "row_data",
+                    "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "membership",
+            "base": "",
+            "fields": [
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "shares",
+                    "type": "uint32"
+                },
+                {
+                    "name": "votes",
+                    "type": "uint32"
+                },
+                {
+                    "name": "reg_time",
+                    "type": "uint64"
+                },
+                {
+                    "name": "l_p_claim",
+                    "type": "uint64"
+                },
+                {
+                    "name": "l_e_vote",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "memconfigs",
+            "base": "",
+            "fields": [
+                {
+                    "name": "template_id",
+                    "type": "uint32"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "vote_weight",
+                    "type": "uint32"
+                },
+                {
+                    "name": "share_weight",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "proposals",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "custodian",
+                    "type": "name"
+                },
+                {
+                    "name": "proposal",
+                    "type": "string"
+                },
+                {
+                    "name": "votes_for",
+                    "type": "uint64"
+                },
+                {
+                    "name": "votes_against",
+                    "type": "uint64"
+                },
+                {
+                    "name": "approved",
+                    "type": "uint8"
+                },
+                {
+                    "name": "expiry",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "propose",
+            "base": "",
+            "fields": [
+                {
+                    "name": "cust",
+                    "type": "name"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "proposal",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "propvotes",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "vote",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "receipts",
+            "base": "",
+            "fields": [
+                {
+                    "name": "receipt_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "payment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "registerdao",
+            "base": "",
+            "fields": [
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "ticker",
+                    "type": "symbol_code"
+                },
+                {
+                    "name": "dao_payer",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "setweights",
+            "base": "",
+            "fields": [
+                {
+                    "name": "template_id",
+                    "type": "uint32"
+                },
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "vote_weight",
+                    "type": "uint16"
+                },
+                {
+                    "name": "share_weight",
+                    "type": "uint16"
+                }
+            ]
+        },
+        {
+            "name": "startelect",
+            "base": "",
+            "fields": [
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "end",
+                    "type": "uint64"
+                },
+                {
+                    "name": "elected_n",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "totalweights",
+            "base": "",
+            "fields": [
+                {
+                    "name": "dao_name",
+                    "type": "name"
+                },
+                {
+                    "name": "vote_totals",
+                    "type": "uint32"
+                },
+                {
+                    "name": "share_totals",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "unstake",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "votecand",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "election_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "candidates",
+                    "type": "name[]"
+                },
+                {
+                    "name": "staked_asset",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "voteprop",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "name"
+                },
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "vote",
+                    "type": "string"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "addcandidate",
+            "type": "addcandidate",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "addpayment",
+            "type": "addpayment",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "claimp",
+            "type": "claimp",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "finishelect",
+            "type": "finishelect",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "hydraload",
+            "type": "hydraload",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "propose",
+            "type": "propose",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "registerdao",
+            "type": "registerdao",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setweights",
+            "type": "setweights",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "startelect",
+            "type": "startelect",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "unstake",
+            "type": "unstake",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "votecand",
+            "type": "votecand",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "voteprop",
+            "type": "voteprop",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "candidates",
+            "type": "candidate",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "custodians",
+            "type": "custodian",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "daos",
+            "type": "daos_p",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "daotokens",
+            "type": "daotokens",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "elections",
+            "type": "elections",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "membership",
+            "type": "membership",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "memconfigs",
+            "type": "memconfigs",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "proposals",
+            "type": "proposals",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "propvotes",
+            "type": "propvotes",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "receipts",
+            "type": "receipts",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "totalweights",
+            "type": "totalweights",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "kv_tables": {},
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}

@@ -25,29 +25,32 @@ void gangdao::votecand(name user, uint64_t election_id, vector<eosio::name> cand
     require_auth(user);
     
     // check if election exists
-    elections_index elections_table(_self, _self.value);
-    auto elections_itr = elections_table.find(election_id);
-    check (elections_itr != elections_table.end(), "election does not exist");
+    elections_table elections_tab(_self, _self.value);
+    auto elections_itr = elections_tab.find(election_id);
+    check (elections_itr != elections_tab.end(), "election does not exist");
+
+    eosio::time_point_sec tps = eosio::current_time_point();
+    uint64_t COUNT_SECONDS (tps.sec_since_epoch());
 
     // check if election is active
-    check (elections_itr->end > now(), "election is not active");
+    check (elections_itr->end > COUNT_SECONDS, "election is not active");
 
     name dao_name = elections_itr->dao_name;
 
     // check if user is a member of the dao and if the membership started before the election
-    members_index members_table(_self, elections_itr->dao_name.value);
+    membership_table members_table(_self, elections_itr->dao_name.value);
     auto members_itr = members_table.find(user.value);
     check (members_itr != members_table.end(), "user is not a member of the dao");
     check (members_itr->reg_time < elections_itr->start, "user is not a member of the dao at the time of the election");
 
     // get user voting power
-    uint16_t voting_power = members_itr->vote_weight;
+    uint16_t voting_power = members_itr->votes;
 
     // divide voting power by number of candidates and round down
     uint16_t vote = voting_power / candidates.size();
 
     // modify the elections table
-    elections_table.modify(elections_itr, _self, [&](auto& row){
+    elections_tab.modify(elections_itr, _self, [&](auto& row){
         row.votes_issued += voting_power;
     });
 
@@ -57,7 +60,7 @@ void gangdao::votecand(name user, uint64_t election_id, vector<eosio::name> cand
         auto votes_itr = candidates_tab.find(cand.value);
         if (votes_itr == candidates_tab.end()){
             candidates_tab.emplace(_self, [&](auto& row){
-                row.candidate = cand;
+                row.cand_name = cand;
                 row.votes = vote;
                 row.election_id = election_id;
                 row.dao_name = dao_name;
@@ -96,14 +99,14 @@ void gangdao::addcandidate(name cand, uint64_t election_id, name dao_name, uint6
 
     // check if candidate is already registered for this election by querying a candidates table secondary index
     candidates_table candidates_tab(_self, dao_name.value);
-    auto by_special_id = candidates_tab.get_index<"bycandelection"_n>();
+    auto by_special_id = candidates_tab.get_index<"bycandelect"_n>();
     auto candidate_itr = by_special_id.find(candidate_election_id);
     check (candidate_itr == by_special_id.end(), "candidate is already registered for this election");
 
 
     // add candidate to candidates table
     candidates_tab.emplace(_self, [&](auto& row){
-        row.candidate = cand;
+        row.cand_name = cand;
         row.votes = 0;
         row.election_id = election_id;
         row.dao_name = dao_name;
@@ -139,9 +142,9 @@ void gangdao::startelect(name dao_name, uint64_t end, uint8_t elected_n){
     eosio::time_point_sec tps = eosio::current_time_point();
     uint64_t COUNT_SECONDS (tps.sec_since_epoch());
     // add election to elections table
-    elections_index elections_table(_self, _self.value);
-    elections_table.emplace(_self, [&](auto& row){
-        row.election_id = elections_table.available_primary_key();
+    elections_table elections_tab(_self, _self.value);
+    elections_tab.emplace(_self, [&](auto& row){
+        row.election_id = elections_tab.available_primary_key();
         row.dao_name = dao_name;
         row.start = COUNT_SECONDS;
         row.end = end;
@@ -173,9 +176,9 @@ void gangdao::finishelect(name dao_name, uint64_t election_id){
     require_auth(dao_name);
 
     // check if election exists
-    elections_index elections_table(_self, _self.value);
-    auto elections_itr = elections_table.find(election_id);
-    check (elections_itr != elections_table.end(), "election does not exist");
+    elections_table elections_tab(_self, _self.value);
+    auto elections_itr = elections_tab.find(election_id);
+    check (elections_itr != elections_tab.end(), "election does not exist");
 
     // check if election is over
     eosio::time_point_sec tps = eosio::current_time_point();
@@ -189,7 +192,7 @@ void gangdao::finishelect(name dao_name, uint64_t election_id){
     vector<electedcandidate> elected;
     for (int i = 0; i < elections_itr->elected_n; i++){
         electedcandidate ec;
-        ec.candidate = votes_itr->candidate;
+        ec.candidate = votes_itr->cand_name;
         ec.votes = votes_itr->votes;
 
         elected.push_back(ec);
@@ -197,15 +200,15 @@ void gangdao::finishelect(name dao_name, uint64_t election_id){
     }
 
     // MODIFY CUSTODIANS TABLE
-    custodians_index custodians_table(_self, dao_name.value);
-    auto custodians_itr = custodians_table.begin();
+    custodians_table custodians_tab(_self, dao_name.value);
+    auto custodians_itr = custodians_tab.begin();
     // iterate through custodians table
     // if custodian has dao_name and is not in elected vector, erase it
     // if custodian has dao_name and is in elected vector, modify it
     // if elected vector is empty during the while loop, stop it
     // if elected vector does not get empty during the while loop, add the remaining custodians to the table
     
-    while (custodians_itr != custodians_table.end()){
+    while (custodians_itr != custodians_tab.end()){
         // check if elected vector is empty
         if (elected.empty()){
             break;
@@ -213,11 +216,11 @@ void gangdao::finishelect(name dao_name, uint64_t election_id){
 
         if (custodians_itr-> dao_name == dao_name){
             for (uint8_t i = 0; i < elected.size(); i++){
-                if (i.candidate == custodians_itr->custodian){
+                if (elected[i].candidate == custodians_itr->cust_name){
                     // modify custodians_itr to fit current election
-                    custodians_table.modify(custodians_itr, _self, [&](auto& row){
+                    custodians_tab.modify(custodians_itr, _self, [&](auto& row){
                         row.cust_end = COUNT_SECONDS + (3600 * 24 * 30);
-                        row.total_votes = i.votes;
+                        row.total_votes = elected[i].votes;
                     });
                     // erase cand from elected vector
                     elected.erase(elected.begin() + i);
@@ -231,9 +234,8 @@ void gangdao::finishelect(name dao_name, uint64_t election_id){
     // if elected vector is not empty, add the remaining custodians to the table
     if (!elected.empty()){
         for (auto cand : elected){
-            custodians_table.emplace(_self, [&](auto& row){
-                row.custodian = cand.candidate;
-                row.cust_start = COUNT_SECONDS;
+            custodians_tab.emplace(_self, [&](auto& row){
+                row.cust_name = cand.candidate;
                 row.cust_end = COUNT_SECONDS + (3600 * 24 * 30);
                 row.total_votes = cand.votes;
                 row.dao_name = dao_name;
