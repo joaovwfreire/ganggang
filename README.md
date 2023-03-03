@@ -1,11 +1,3 @@
-On contract documentation:
-    Function name
-    Description
-    Parameters
-    Return value
-    Example
-    Notes
-
 # NonFungibleGang DAO Factory Smart Contract (NFGDAOFactory)
 
 ## Overview
